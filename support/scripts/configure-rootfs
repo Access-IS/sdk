@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+echo "configuring  rootfs"
+cat > output/target/etc/exports <<EOF
+/opt     *(rw,sync,no_subtree_check,no_root_squash)
+EOF
+# remove proc mount entry (already done before switch_root)
+sed -i '/si0/d' output/target/etc/inittab
+# remove remount rw entry too
+sed -i '/si1/d' output/target/etc/inittab
+rm output/target/etc/dropbear
+mkdir output/target/etc/dropbear
+cp system/dropbear_ecdsa_host_key output/target/etc/dropbear/
+cd output/target/usr/share/terminfo/x/
+if [ ! -L xterm-256color ]; then
+	ln -s xterm-color xterm-256color
+fi
+cd -
+
+cat > output/target/root/gadget <<EOF
+#!/bin/bash
+modprobe libcomposite
+mount -t configfs none /sys/kernel/config
+mkdir /sys/kernel/config/usb_gadget/g1
+cd /sys/kernel/config/usb_gadget/g1 
+echo 0x1d6b > idVendor # Linux Foundation
+echo 0x0104 > idProduct # Multifunction Composite Gadget
+echo 0x0100 > bcdDevice # v1.0.0
+echo 0x0200 > bcdUSB # USB2
+mkdir -p strings/0x409
+echo "fedcba9876543210" > strings/0x409/serialnumber
+echo "Access IS" > strings/0x409/manufacturer 
+echo "multifunction gadget" > strings/0x409/product 
+mkdir -p functions/ecm.usb0
+mkdir -p functions/mass_storage.usb0
+echo /dev/mtdblock4 > functions/mass_storage.usb0/lun.0/file
+mkdir -p configs/c.1/strings/0x409
+echo "66:AC:4F:48:B3:96" > functions/ecm.usb0/host_addr
+echo "Config 1: ECM network" > configs/c.1/strings/0x409/configuration 
+echo 250 > configs/c.1/MaxPower 
+ln -s functions/ecm.usb0 configs/c.1/
+ln -s functions/mass_storage.usb0 configs/c.1/
+echo "ci_hdrc.0" > /sys/kernel/config/usb_gadget/g1/UDC
+ifconfig lo up
+ifconfig usb0 192.168.99.2 netmask 255.255.255.0 up
+exit 0
+EOF
+
+chmod +x output/target/root/gadget
+
+cat > output/target/etc/init.d/S91gadget <<EOF
+#! /bin/sh
+# 
+#  invoke gadets 
+#  
+
+case "\$1" in
+	start)
+		/root/gadget
+		;;
+	stop)
+		;;
+	*)
+		exit 1
+		;;
+esac
+EOF
+
+chmod +x output/target/etc/init.d/S91gadget
+

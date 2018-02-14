@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+echo "configuring  rootfs"
+rm output/target/etc/init.d/S21mtdmnt
+
+cat > output/target/root/gadget <<EOF
+#!/bin/bash
+modprobe libcomposite
+mount -t configfs none /sys/kernel/config
+mkdir /sys/kernel/config/usb_gadget/g1
+cd /sys/kernel/config/usb_gadget/g1 
+echo 0x1d6b > idVendor # Linux Foundation
+echo 0x0104 > idProduct # Multifunction Composite Gadget
+echo 0x0100 > bcdDevice # v1.0.0
+echo 0x0200 > bcdUSB # USB2
+mkdir -p strings/0x409
+echo "fedcba9876543210" > strings/0x409/serialnumber
+echo "Access IS" > strings/0x409/manufacturer 
+echo "multi storage gadget" > strings/0x409/product 
+mkdir -p functions/acm.usb0
+mkdir -p functions/mass_storage.usb0
+mkdir -p functions/mass_storage.usb1
+mkdir -p functions/mass_storage.usb2
+mkdir -p functions/mass_storage.usb3
+mkdir -p functions/mass_storage.usb4
+echo /dev/mtdblock0 > functions/mass_storage.usb0/lun.0/file
+echo /dev/mtdblock1 > functions/mass_storage.usb1/lun.0/file
+echo /dev/mtdblock2 > functions/mass_storage.usb2/lun.0/file
+echo /dev/mtdblock3 > functions/mass_storage.usb3/lun.0/file
+echo /dev/mtdblock4 > functions/mass_storage.usb4/lun.0/file
+mkdir -p configs/c.1/strings/0x409
+echo 250 > configs/c.1/MaxPower 
+ln -s functions/acm.usb0 configs/c.1/
+ln -s functions/mass_storage.usb0 configs/c.1/
+ln -s functions/mass_storage.usb1 configs/c.1/
+ln -s functions/mass_storage.usb2 configs/c.1/
+ln -s functions/mass_storage.usb3 configs/c.1/
+ln -s functions/mass_storage.usb4 configs/c.1/
+echo "ci_hdrc.0" > /sys/kernel/config/usb_gadget/g1/UDC
+exit 0
+EOF
+
+chmod +x output/target/root/gadget
+
+cat > output/target/etc/init.d/S91gadget <<EOF
+#! /bin/sh
+# 
+#  invoke gadets 
+#  
+
+case "\$1" in
+	start)
+		/root/gadget
+		;;
+	stop)
+		;;
+	*)
+		exit 1
+		;;
+esac
+EOF
+
+chmod +x output/target/etc/init.d/S91gadget
+

@@ -1,0 +1,24 @@
+#! /bin/sh
+# 
+#  The leds stay white for one second to indicate proper initilisation
+#  
+
+case "$1" in
+	start)
+		# configure pwm leds 
+		for i in 0 1 2 ; do
+		echo 0 > /sys/class/pwm/pwmchip$i/export ;
+		echo 1000000 >  /sys/class/pwm/pwmchip$i/pwm0/period ;
+		echo  200000 >  /sys/class/pwm/pwmchip$i/pwm0/duty_cycle ;
+		echo 1 > /sys/class/pwm/pwmchip$i/pwm0/enable ;
+		done
+		for i in 0 1 2 ; do
+		echo 1 > /sys/class/pwm/pwmchip$i/pwm0/enable ;
+		done
+		;;
+	stop)
+		;;
+	*)
+		exit 1
+		;;
+esac

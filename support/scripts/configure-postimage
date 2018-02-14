@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+gitversion=`git rev-parse --short HEAD`
+cd output/images
+md5sum rootfs.squashfs > MD5SUM
+sed -i 's*rootfs*base/rootfs*g' MD5SUM
+mv rootfs.squashfs root.$gitversion
+
