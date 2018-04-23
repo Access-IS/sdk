@@ -18,8 +18,10 @@ make sdk
 When done, the sdk will be in output/images/sdk-xxxxxx.tar.gz
 (the xxxxxxx is the sdk repo git commit version)
 
-expand the tar file to your $(HOME), which will create a $(HOME)/sdk directory
+as root, expand the tar file to /opt/ , which will create an /opt/sdk directory
 
-The rest of the builds (kernel, uboot, buildroot) refer to this $(HOME)/sdk to ensure consitancy
+as normal user do a  source /opt/sdk/env.sh to add sdk binary path, sysroot and other environment variables 
+
+The rest of the builds (kernel, uboot, buildroot) refer to this /opt/sdk to ensure consitancy
 
 Have fun
