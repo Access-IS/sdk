@@ -5,9 +5,9 @@
 #cp -a output/host output/sdk
 
 cat > /opt/sdk/env.sh <<EOF
-export SYSROOT=\$HOME/sdk/arm-buildroot-linux-gnueabihf/sysroot
-export PATH=\$HOME/sdk/bin:$PATH
-export HOST=arm-buildroot-linux-
+export SYSROOT=/opt/sdk/arm-ais-linux-gnueabihf/sysroot
+export PATH=/opt/sdk/bin:\$PATH
+export HOST=arm-ais-linux-
 EOF
 
 cat .config | gzip -9 > /opt/sdk/.BRconfig.gz
