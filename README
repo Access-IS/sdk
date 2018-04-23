@@ -10,6 +10,10 @@ Pick the minimal configuration. This will build quickly with the just the necess
 cd sdk
 make sdk-minimal_defconfig
 
+create /opt/sdk, change permissions:
+sudo mkdir /opt/sdk
+sudo chown <user>.<group> /opt/sdk
+
 kick off the build :
 make sdk
 
