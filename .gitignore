@@ -1,3 +1,4 @@
 output/
 dl/
-.config
+.config*
+..config*
