@@ -3,7 +3,7 @@ This tool is based on Buildroot.
 To build the sdk, do the following
 
 Clone the repo:
-git@10.1.30.30:Lalith/sdk.git
+git@github.com/Access-IS/sdk.git
 
 Pick the minimal configuration. This will build quickly with the just the necessary tools / libs :
 
